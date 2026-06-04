@@ -32,5 +32,14 @@ services:
     depends_on:
       - backend
 
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime_data:/app/data
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  uptime_data:
