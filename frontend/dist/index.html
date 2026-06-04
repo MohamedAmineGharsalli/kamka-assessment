@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Todo App</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    h1 { color: #1a1a2e; }
+    input[type=text] { width: 70%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 16px; background: #0f6e56; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+    .done { text-decoration: line-through; color: #999; }
+    .del { background: #c0392b; padding: 4px 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Todos — KAMKA</h1>
+  <div style="margin-bottom:20px">
+    <input id="inp" type="text" placeholder="Nouvelle tache..." />
+    <button onclick="addTodo()">Ajouter</button>
+  </div>
+  <ul id="list"></ul>
+  <script>
+    const API = '/api';
+    async function load() {
+      const res = await fetch(API + '/todos');
+      const todos = await res.json();
+      document.getElementById('list').innerHTML = todos.map(t =>
+        '<li>' +
+        '<input type="checkbox" ' + (t.done ? 'checked' : '') + ' onchange="toggle(' + t.id + ')"/>' +
+        '<span class="' + (t.done ? 'done' : '') + '">' + t.title + '</span>' +
+        '<button class="del" onclick="del(' + t.id + ')">X</button>' +
+        '</li>'
+      ).join('');
+    }
+    async function addTodo() {
+      const title = document.getElementById('inp').value;
+      if (!title) return;
+      await fetch(API + '/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title })
+      });
+      document.getElementById('inp').value = '';
+      load();
+    }
+    async function toggle(id) {
+      await fetch(API + '/todos/' + id, { method: 'PATCH' });
+      load();
+    }
+    async function del(id) {
+      await fetch(API + '/todos/' + id, { method: 'DELETE' });
+      load();
+    }
+    load();
+  </script>
+</body>
+</html>
